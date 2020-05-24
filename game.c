@@ -38,7 +38,7 @@ void start(int iterations) {
 }
 
 void run(int iterations) {
-    if (INPLACE) {
+        #ifdef INPLACE
         for (int i=0; i< iterations; i++) {
             // Set all values
             for (unsigned int y = 0; y < size; y++) {
@@ -80,7 +80,7 @@ void run(int iterations) {
             #ifdef PRINTEACH
             printResults();
             #endif
-        }
+        #endif
     }
 }
 
