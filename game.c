@@ -70,11 +70,7 @@ void run(int iterations) {
                     char value = board[y][x];
                     value -= 5;
                     unsigned char uc = value;
-                    if (uc <= 2) {
-                        board[y][x] = 1;
-                    } else {
-                        board[y][x] = 0;
-                    }
+                    board[y][x] = (char)(uc <= 2);
                 }
             }
             #ifdef PRINTEACH
