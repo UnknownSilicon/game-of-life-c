@@ -6,9 +6,9 @@ char** board;
 
 void initialize();
 
-void start();
+void start(int iterations);
 
-void run();
+void run(int iterations);
 
 void printResults();
 
