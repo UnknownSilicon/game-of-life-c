@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #define INPLACE true
+#define PRINTEACH true
 
 void initialize() {
     FILE* f = fopen("C:/Users/Jake/Documents/Programming/gameOfLifeFAST/input.txt", "r");
@@ -28,53 +29,57 @@ void initialize() {
 }
 
 
-void start() {
+void start(int iterations) {
     initialize();
     printResults();
-    run();
+    run(iterations);
     printResults();
     cleanup();
 }
 
-void run() {
+void run(int iterations) {
     if (INPLACE) {
-        // Set all values
-        for (unsigned int y=0; y<size; y++) {
-            for (unsigned int x=0; x<size; x++) {
-                if (board[y][x] % 2) { // Is cell alive?
-                    // Increment all adjacent cells by 2. Also check to make sure they exist
-                    unsigned int dy = y-1;
-                    unsigned int dx = x-1;
-                    if (dx < size && dy < size) board[dy][dx]+=2;
-                    if (++dx < size && dy < size) board[dy][dx]+=2;
-                    if (++dx < size && dy < size) board[dy][dx]+=2;
-                    dx = x-1;
-                    dy++;
-                    if (dx < size && dy < size) board[dy][dx]+=2;
-                    dx++; // Skip the middle
-                    if (++dx < size && dy < size) board[dy][dx]+=2;
-                    dx = x-1;
-                    dy++;
-                    if (dx < size && dy < size) board[dy][dx]+=2;
-                    if (++dx < size && dy < size) board[dy][dx]+=2;
-                    if (++dx < size && dy < size) board[dy][dx]+=2;
+        for (int i=0; i< iterations; i++) {
+            // Set all values
+            for (unsigned int y = 0; y < size; y++) {
+                for (unsigned int x = 0; x < size; x++) {
+                    if (board[y][x] % 2) { // Is cell alive?
+                        // Increment all adjacent cells by 2. Also check to make sure they exist
+                        unsigned int dy = y - 1;
+                        unsigned int dx = x - 1;
+                        if (dx < size && dy < size) board[dy][dx] += 2;
+                        if (++dx < size && dy < size) board[dy][dx] += 2;
+                        if (++dx < size && dy < size) board[dy][dx] += 2;
+                        dx = x - 1;
+                        dy++;
+                        if (dx < size && dy < size) board[dy][dx] += 2;
+                        dx++; // Skip the middle
+                        if (++dx < size && dy < size) board[dy][dx] += 2;
+                        dx = x - 1;
+                        dy++;
+                        if (dx < size && dy < size) board[dy][dx] += 2;
+                        if (++dx < size && dy < size) board[dy][dx] += 2;
+                        if (++dx < size && dy < size) board[dy][dx] += 2;
+                    }
                 }
             }
-        }
 
-
-        // Update alive status
-        for (unsigned int y=0; y<size; y++) {
-            for (unsigned int x=0; x<size; x++) {
-                char value = board[y][x];
-                value -= 5;
-                unsigned char uc = value;
-                if (uc <= 2) {
-                    board[y][x] = 1;
-                } else {
-                    board[y][x] = 0;
+            // Update alive status
+            for (unsigned int y = 0; y < size; y++) {
+                for (unsigned int x = 0; x < size; x++) {
+                    char value = board[y][x];
+                    value -= 5;
+                    unsigned char uc = value;
+                    if (uc <= 2) {
+                        board[y][x] = 1;
+                    } else {
+                        board[y][x] = 0;
+                    }
                 }
             }
+            #ifdef PRINTEACH
+            printResults();
+            #endif
         }
     }
 }
