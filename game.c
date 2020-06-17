@@ -7,24 +7,28 @@
 #include <stdbool.h>
 #define INPLACE true
 #define PRINTEACH true
+#define PRINTABSOLUTE false
 
 void initialize() {
     FILE* f = fopen("C:/Users/Jake/Documents/Programming/gameOfLifeFAST/input.txt", "r");
 
-    fscanf(f, "%d", &size);
-    size = (size+1)/2; // Divide by 2 and round up
+    fscanf(f, "%d", &ySize);
+    xSize = (ySize+1)/2; // Divide by 2 and round up
 
-    board = malloc(size * sizeof(char*));
+    board = malloc(ySize * sizeof(char*));
 
-    for(int i=0; i<size; i++) {
-        board[i] = malloc(size * sizeof(char));
+    for(int i=0; i<ySize; i++) {
+        board[i] = malloc(xSize * sizeof(char));
 
         // This can actually be made even faster since the only possible values are 1 or 0
         unsigned int temp = 0;
         unsigned int val;
         unsigned int combine_mask = 0;
         int j=0;
-        while(j<size) {
+
+        int xLimit = xSize;
+        bool oneLess = xSize != ySize/2;
+        while(j<xSize) {
             fscanf(f, "%d", &val);
             temp = ((temp & combine_mask) | val) | (val & ~combine_mask); // Store either temp, or val in temp based on the mask
 
@@ -34,6 +38,9 @@ void initialize() {
 
             j += combine_mask != 0;
             combine_mask = ~combine_mask;
+            if (j+1 == xSize && combine_mask == ~0u) {
+                break;
+            }
         }
     }
 
@@ -50,43 +57,98 @@ void start(int iterations) {
 }
 
 void run(int iterations) {
-        #ifdef INPLACE
+        #if INPLACE
         for (int i=0; i< iterations; i++) {
             // Set all values
-            for (unsigned int y = 0; y < size; y++) {
-                for (unsigned int x = 0; x < size; x++) {
-                    // TODO: Rewrite this bit to take into account the shifted values
-                    if (board[y][x] % 2) { // Is cell alive?
-                        // Increment all adjacent cells by 2. Also check to make sure they exist
-                        unsigned int dy = y - 1;
-                        unsigned int dx = x - 1;
-                        if (dx < size && dy < size && board[dy][dx] < 8) board[dy][dx] += 2;
-                        if (++dx < size && dy < size && board[dy][dx] < 8) board[dy][dx] += 2;
-                        if (++dx < size && dy < size && board[dy][dx] < 8) board[dy][dx] += 2;
-                        dx = x - 1;
-                        dy++;
-                        if (dx < size && dy < size && board[dy][dx] < 8) board[dy][dx] += 2;
-                        dx++; // Skip the middle
-                        if (++dx < size && dy < size && board[dy][dx] < 8) board[dy][dx] += 2;
-                        dx = x - 1;
-                        dy++;
-                        if (dx < size && dy < size && board[dy][dx] < 8) board[dy][dx] += 2;
-                        if (++dx < size && dy < size && board[dy][dx] < 8) board[dy][dx] += 2;
-                        if (++dx < size && dy < size && board[dy][dx] < 8) board[dy][dx] += 2;
+            for (unsigned int y = 0; y < ySize; y++) {
+
+                unsigned int combine_mask = 0;
+                unsigned int x = 0;
+                while (x < xSize) {
+                    unsigned char value = board[y][x];
+                    if (combine_mask == 0) {
+                        value = value >> 4u;
+                    } else {
+                        value = value & 15u;
                     }
+
+                    if (value % 2) { // Is cell alive?
+                        // Increment all adjacent cells by 2. Also check to make sure they exist
+                        unsigned dy = y - 1;
+
+                        // Note: This could probably be optimized a bit more, but it would be very, very gross
+                        // This conditional could be killed in favor of a bitwise method, although this is probably faster
+                        if (combine_mask == 0) {
+                            unsigned dx = x - 1;
+
+                            if (dx < xSize && dy < ySize && ((board[dy][dx] & 15u) < 8)) board[dy][dx] += 2;
+                            dx++;
+                            if(dx < xSize && dy < ySize && (board[dy][dx]>>4u) < 8) board[dy][dx] += 32; // Account for the shift
+                            if (dx < xSize && dy < ySize && ((board[dy][dx] & 15u) < 8)) board[dy][dx] += 2;
+
+                            dy++;
+                            dx = x-1;
+                            if (dx < xSize && dy < ySize && ((board[dy][dx] & 15u) < 8)) board[dy][dx] += 2;
+                            dx++;
+                            // Ignore center
+                            if (dx < xSize && dy < ySize && ((board[dy][dx] & 15u) < 8)) board[dy][dx] += 2;
+
+                            dy++;
+                            dx = x-1;
+                            if (dx < xSize && dy < ySize && ((board[dy][dx] & 15u) < 8)) board[dy][dx] += 2;
+                            dx++;
+                            if(dx < xSize && dy < ySize && (board[dy][dx]>>4u) < 8) board[dy][dx] += 32;
+                            if (dx < xSize && dy < ySize && ((board[dy][dx] & 15u) < 8)) board[dy][dx] += 2;
+                        } else {
+                            unsigned dx = x;
+                            if (dx <xSize && dy< ySize && (board[dy][dx]>>4u) < 8) board[dy][dx] += 32;
+                            if (dx < xSize && dy < ySize && ((board[dy][dx] & 15u) < 8)) board[dy][dx] += 2;
+                            dx++;
+                            if (dx <xSize && dy< ySize && (board[dy][dx]>>4u) < 8) board[dy][dx] += 32;
+
+                            dy++;
+                            dx = x;
+                            if (dx <xSize && dy< ySize && (board[dy][dx]>>4u) < 8) board[dy][dx] += 32;
+                            // Ignore center
+                            dx++;
+                            if (dx <xSize && dy< ySize && (board[dy][dx]>>4u) < 8) board[dy][dx] += 32;
+
+                            dy++;
+                            dx = x;
+                            if (dx <xSize && dy< ySize && (board[dy][dx]>>4u) < 8) board[dy][dx] += 32;
+                            if (dx < xSize && dy < ySize && ((board[dy][dx] & 15u) < 8)) board[dy][dx] += 2;
+                            dx++;
+                            if (dx <xSize && dy< ySize && (board[dy][dx]>>4u) < 8) board[dy][dx] += 32;
+                        }
+                    }
+
+                    x += combine_mask != 0;
+                    combine_mask = ~combine_mask;
                 }
             }
 
             // Update alive status
-            for (unsigned int y = 0; y < size; y++) {
-                for (unsigned int x = 0; x < size; x++) {
-                    char value = board[y][x];
-                    value -= 5;
-                    unsigned char uc = value;
-                    board[y][x] = (char)(uc <= 2);
+            for (unsigned int y = 0; y < ySize; y++) {
+
+                unsigned int x = 0;
+                unsigned int combine_mask = 0;
+                while (x < xSize) {
+                    unsigned char value = board[y][x];
+                    unsigned char left = value >> 4u;
+                    unsigned char right = value & 15u;
+                    left -= 5;
+                    right -=5;
+
+                    unsigned char newValue = 0;
+                    newValue = left <= 2u;
+                    newValue = newValue << 4u;
+                    right = right <= 2u;
+                    board[y][x] = newValue | right;
+
+                    x++;
                 }
             }
-            #ifdef PRINTEACH
+            #if PRINTEACH
             printResults();
             #endif
         #endif
@@ -94,17 +156,29 @@ void run(int iterations) {
 }
 
 void printResults() {
-    for (int i=0; i<size; i++) {
-        for (int j=0; j<size; j++) {
+#if PRINTABSOLUTE
+    for (int i=0; i<ySize; i++) {
+        for (int j=0; j<xSize; j++) {
             printf("%d ", board[i][j]);
         }
         printf("\n");
     }
     printf("\n");
+#else
+    for (int i=0; i<ySize; i++) {
+        for (int j=0; j<xSize; j++) {
+            unsigned char val = board[i][j];
+            printf("%d ", val >> 4u);
+            printf("%d ", val & 15u);
+        }
+        printf("\n");
+    }
+    printf("\n");
+#endif
 }
 
 void cleanup() {
-    for (int i=0; i<size; i++) {
+    for (int i=0; i<ySize; i++) {
         free(board[i]);
     }
     free(board);

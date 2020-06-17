@@ -1,8 +1,9 @@
 #pragma once
 
-int size;
+int ySize;
+int xSize;
 
-char** board;
+unsigned char** board;
 
 void initialize();
 
