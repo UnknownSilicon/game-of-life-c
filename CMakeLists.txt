@@ -3,4 +3,4 @@ project(gameOfLifeFAST C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(gameOfLifeFAST main.c game.c)
+add_executable(gameOfLifeFAST main.c game.c benchmark.c benchmark.h)

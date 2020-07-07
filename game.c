@@ -8,6 +8,10 @@
 #define INPLACE true
 #define PRINTEACH true
 #define PRINTABSOLUTE false
+#define BENCHMARK true
+#if BENCHMARK
+#include "benchmark.h"
+#endif
 
 void initialize() {
     FILE* f = fopen("C:/Users/Jake/Documents/Programming/gameOfLifeFAST/input.txt", "r");
@@ -51,8 +55,18 @@ void initialize() {
 void start(int iterations) {
     initialize();
     printResults();
+#if BENCHMARK
+    startClock();
+#endif
     run(iterations);
+#if BENCHMARK
+    endClock();
+#endif
     printResults();
+#if BENCHMARK
+    uint64_t final_time = getDelta();
+    printf("Took %lu us, %lf s\n", final_time, final_time/1000000.0);
+#endif
     cleanup();
 }
 
