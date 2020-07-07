@@ -18,6 +18,7 @@ void initialize() {
 
     fscanf(f, "%d", &ySize);
     xSize = (ySize+1)/2; // Divide by 2 and round up
+    bool isEven = ySize/2 == ySize;
 
     board = malloc(ySize * sizeof(char*));
 
@@ -41,8 +42,10 @@ void initialize() {
             board[i][j] = (char)temp;
 
             j += combine_mask != 0;
+
             combine_mask = ~combine_mask;
-            if (j+1 == xSize && combine_mask == ~0u) {
+            if ( (!isEven && j+1 == xSize && combine_mask == ~0u)
+            || isEven && j == xSize && combine_mask == 0u) {
                 break;
             }
         }
